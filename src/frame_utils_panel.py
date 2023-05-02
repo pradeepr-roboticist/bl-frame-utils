@@ -1,5 +1,14 @@
 from bpy.types import Panel
 from bpy.utils import register_class, unregister_class
+import mathutils
+import textwrap
+ 
+def _label_multiline(context, text, parent):
+    chars = int(context.region.width / 7)   # 7 pix on 1 character
+    wrapper = textwrap.TextWrapper(width=chars)
+    text_lines = wrapper.wrap(text=text)
+    for text_line in text_lines:
+        parent.label(text=text_line)
 
 class FrameUtilsPanel:
     bl_space_type = "VIEW_3D"
@@ -12,17 +21,37 @@ class PT_FrameUtilsPanel(FrameUtilsPanel, Panel):
 
     def draw(self, context):
         layout = self.layout
-        frame_utils_data = context.scene.FrameUtilsData # <- set in standoff_props.register()
-        # layout.prop(frame_utils_data, "obj") # Add a pointer property to the panel
-        layout.prop(frame_utils_data, "obj1")
-        layout.prop(frame_utils_data, "obj2")
+        frame_utils_data = context.scene.FrameUtilsData
+        layout.prop(frame_utils_data, "reference", text="Reference")
+        layout.prop(frame_utils_data, "target", text="Target")
+        layout.prop(frame_utils_data, "coordinate_system", text="Representation in Frame")
         text = ""
-        if frame_utils_data.obj1 and frame_utils_data.obj2:
-            _1_T_2 = frame_utils_data.obj1.matrix_world.inverted() @ frame_utils_data.obj2.matrix_world
-            text = f"{frame_utils_data.obj2.name} wrt {frame_utils_data.obj1.name}" + "\n"
-            text += f"Position: {_1_T_2.translation}" + "\n"
-            text += f"Orientation: {_1_T_2.to_quaternion()}" + "\n"
-        layout.label(text=text)
+        reference = frame_utils_data.reference
+        target = frame_utils_data.target
+        coordinate_system = frame_utils_data.coordinate_system
+        if coordinate_system is None:
+            coordinate_system = reference
+        if reference and target:
+            _1_T_2 = reference.matrix_world.inverted() @ target.matrix_world
+            layout.label(text=f"{target.name} wrt {reference.name}")
+            pos = _1_T_2.translation
+            quat = _1_T_2.to_quaternion()
+            layout.label(text=f"DX = {pos.x}")
+            layout.label(text=f"DY = {pos.y}")
+            layout.label(text=f"DZ = {pos.z}")
+            layout.label(text=f"QX = {quat.x}")
+            layout.label(text=f"QY = {quat.y}")
+            layout.label(text=f"QZ = {quat.z}")
+            layout.label(text=f"QW = {quat.w}")
+            layout.label(text="-"*20)
+            layout.label(text=f"In C = {coordinate_system.name}, (DX, DY, DZ) is:")
+            pos2 = mathutils.Vector((pos.x, pos.y, pos.z, 0))
+            rep = coordinate_system.matrix_world.inverted() @ reference.matrix_world @ pos2
+            layout.label(text=f"X_C = {rep.x}")
+            layout.label(text=f"Y_C = {rep.y}")
+            layout.label(text=f"Z_C = {rep.z}")
+        # layout.label(text=text)
+        # _label_multiline(context=context, text=text, parent=layout)
         # layout.operator("scene.add_new_standoff") # <- registered in standoff_operator.py
         # layout.prop(standoff_data, "metric_diameter")
         # layout.prop(standoff_data, "height")

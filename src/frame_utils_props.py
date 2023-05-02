@@ -4,8 +4,9 @@ from bpy.utils import register_class, unregister_class
 
 class PG_FrameUtils(bpy.types.PropertyGroup):
     # Define properties
-    obj1: bpy.props.PointerProperty(type=bpy.types.Object)
-    obj2: bpy.props.PointerProperty(type=bpy.types.Object)
+    reference: bpy.props.PointerProperty(type=bpy.types.Object)
+    target: bpy.props.PointerProperty(type=bpy.types.Object)
+    coordinate_system: bpy.props.PointerProperty(type=bpy.types.Object)
 
 def register():
     register_class(PG_FrameUtils)
