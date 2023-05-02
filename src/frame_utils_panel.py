@@ -24,7 +24,7 @@ class PT_FrameUtilsPanel(FrameUtilsPanel, Panel):
         frame_utils_data = context.scene.FrameUtilsData
         layout.prop(frame_utils_data, "reference", text="Reference")
         layout.prop(frame_utils_data, "target", text="Target")
-        layout.prop(frame_utils_data, "coordinate_system", text="Representation in Frame")
+        layout.prop(frame_utils_data, "coordinate_system", text="Expressed In")
         text = ""
         reference = frame_utils_data.reference
         target = frame_utils_data.target
@@ -33,23 +33,23 @@ class PT_FrameUtilsPanel(FrameUtilsPanel, Panel):
             coordinate_system = reference
         if reference and target:
             _1_T_2 = reference.matrix_world.inverted() @ target.matrix_world
-            layout.label(text=f"{target.name} wrt {reference.name}")
+            layout.label(text=f"{target.name} wrt {reference.name} (R)")
             pos = _1_T_2.translation
             quat = _1_T_2.to_quaternion()
-            layout.label(text=f"DX = {pos.x}")
-            layout.label(text=f"DY = {pos.y}")
-            layout.label(text=f"DZ = {pos.z}")
-            layout.label(text=f"QX = {quat.x}")
-            layout.label(text=f"QY = {quat.y}")
-            layout.label(text=f"QZ = {quat.z}")
-            layout.label(text=f"QW = {quat.w}")
+            layout.label(text=f"R_X = {pos.x}")
+            layout.label(text=f"R_Y = {pos.y}")
+            layout.label(text=f"R_Z = {pos.z}")
+            layout.label(text=f"R_QX = {quat.x}")
+            layout.label(text=f"R_QY = {quat.y}")
+            layout.label(text=f"R_QZ = {quat.z}")
+            layout.label(text=f"R_QW = {quat.w}")
             layout.label(text="-"*20)
-            layout.label(text=f"In C = {coordinate_system.name}, (DX, DY, DZ) is:")
+            layout.label(text=f"Expressed in {coordinate_system.name}, (R_X, R_Y, R_Z) is:")
             pos2 = mathutils.Vector((pos.x, pos.y, pos.z, 0))
             rep = coordinate_system.matrix_world.inverted() @ reference.matrix_world @ pos2
-            layout.label(text=f"X_C = {rep.x}")
-            layout.label(text=f"Y_C = {rep.y}")
-            layout.label(text=f"Z_C = {rep.z}")
+            layout.label(text=f"C_X = {rep.x}")
+            layout.label(text=f"C_Y = {rep.y}")
+            layout.label(text=f"C_Z = {rep.z}")
         # layout.label(text=text)
         # _label_multiline(context=context, text=text, parent=layout)
         # layout.operator("scene.add_new_standoff") # <- registered in standoff_operator.py
